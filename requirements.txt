@@ -1,0 +1,5 @@
+plotnine
+pulp 
+numpy
+pandas 
+jupyter
