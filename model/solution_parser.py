@@ -22,4 +22,4 @@ def parse_solution(
     )
     objective = pulp.value(model.objective)
 
-    return df, objective
+    return df, objective    
