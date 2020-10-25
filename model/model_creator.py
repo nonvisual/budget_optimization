@@ -1,22 +1,46 @@
-import pulp 
+import pulp
 import pandas as pd
 
-def create_model(data:pd.DataFrame, savings:float, grocery_per_week:float):
-    total_expenditure = data.sum()['amount']
+
+def create_model(data: pd.DataFrame, savings: float, grocery_per_week: float):
+    total_expenditure = data.sum()["amount"]
 
     model = pulp.LpProblem("Profit_maximizing_problem", -1)
-    decision_vars = pulp.LpVariable.dicts("Transaction", range(len(data)), 0, 1, pulp.LpInteger)
-    model += pulp.lpSum([decision_vars[t] * data.loc[t, 'importance'] for t in range(len(data))])
-    model += pulp.lpSum([decision_vars[t] * data.loc[t, 'amount'] for t in range(len(data))]) <= (
-                1 - savings) * total_expenditure
-    model+=pulp.lpSum([decision_vars[t] if data.loc[t,'type'] == 3 else 0.0 for t in range(len(data))]) >= 12
-    agg_per_week = data[data['type'] == 1].groupby('week').sum()
+    decision_vars = pulp.LpVariable.dicts(
+        "Transaction", range(len(data)), 0, 1, pulp.LpInteger
+    )
+    objective = pulp.lpSum(
+        [decision_vars[t] * data.loc[t, "importance"] for t in range(len(data))]
+    )
+    model += objective
+
+    savings_constraint = (
+        pulp.lpSum([decision_vars[t] * data.loc[t, "amount"] for t in range(len(data))])
+        <= (1 - savings) * total_expenditure
+    )
+    model += savings_constraint
+    no_savings_on_rent = (
+        pulp.lpSum(
+            [
+                decision_vars[t] if data.loc[t, "type"] == 3 else 0.0
+                for t in range(len(data))
+            ]
+        )
+        >= 12
+    )
+    model += no_savings_on_rent
+    agg_per_week = data[data["type"] == 1].groupby("week").sum()
 
     for w in range(52):
         if w in agg_per_week.index:
-            week_grocery_spending = agg_per_week.loc[w, 'amount']
-            model += pulp.lpSum([decision_vars[t] * data.loc[t, 'amount'] \
-                                     if data.loc[t, 'week'] == w else 0.0 for t in range(len(data))]) \
-                     >= min(week_grocery_spending, grocery_per_week)
+            week_grocery_spending = agg_per_week.loc[w, "amount"]
+            model += pulp.lpSum(
+                [
+                    decision_vars[t] * data.loc[t, "amount"]
+                    if (data.loc[t, "week"] == w) and (data.loc[t, "type"] == 1)
+                    else 0.0
+                    for t in range(len(data))
+                ]
+            ) >= min(week_grocery_spending, grocery_per_week)
 
     return model, decision_vars
