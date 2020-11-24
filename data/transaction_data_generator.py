@@ -11,20 +11,21 @@ def generate_transaction_data(
 ) -> pd.DataFrame:
     np.random.seed(seed=seed)
     info_recs = [
-        "Lidl",
-        "Rewe",
-        "Edeka",
-        "Aldi",
-        "Zalando",
-        "Amazon",
-        "Decathlon",
-        "Mediamarkt",
-        "Easyjet",
-        "Lufthansa",
-        "Booking.com",
+        "Lidl 124 DE",
+        "Rewe SAGT DANKE",
+        "Edeka 1452 BERLIN//BERLIN/DE 02-11-2020T1",
+        "ALDI SAGT DANKE 128 041//Berlin/DE",
+        "ROSSMANN 124",
+        "Zalando Payments GmbH;SUPP Lieferantenzahlg",
+        "AMAZON PAYMENTS EUROPE S.C.A.",
+        "Decathlon 142 Berlin",
+        "Mediamarkt DE 124",
+        "Easyjet DE 123",
+        "Lufthansa DE 513",
+        "Booking.com hotel",
     ]
-    multipliers_recs = [1, 1, 1, 1, 2, 2, 3, 4, 10, 15, 25]
-    rec_probabilities = np.array([7, 5, 10, 5, 3, 3, 1, 0.5, 0.1, 0.1, 0.1])
+    multipliers_recs = [1, 1, 1, 1, 1, 2, 2, 3, 4, 10, 15, 25]
+    rec_probabilities = np.array([7, 5, 10, 5, 3, 3, 3, 1, 0.5, 0.1, 0.1, 0.1])
     rec_probabilities = rec_probabilities / sum(rec_probabilities)
 
     choices = np.random.choice(len(info_recs), data_size, p=rec_probabilities)
@@ -32,7 +33,7 @@ def generate_transaction_data(
         {
             "Beneficiary / Originator": np.take(info_recs, choices),
             "Payment Details": np.take(info_recs, choices),
-            "Debit": np.take(multipliers_recs, choices),
+            "Debit": -1 * np.take(multipliers_recs, choices),
         }
     )
 
@@ -52,7 +53,7 @@ def add_rent_transactions(data, start_date, end_date, amount=1200.0):
         {
             "Beneficiary / Originator": ["Landlord"] * len(dates),
             "Payment Details": ["Rent"] * len(dates),
-            "Debit": [amount] * len(dates),
+            "Debit": [-1 * amount] * len(dates),
             "Credit": np.nan,
             "Booking date": dates,
         }
