@@ -22,6 +22,16 @@ def visualize_data(transactions: pd.DataFrame, year=2019):
     )
     fig.show()
 
+    fig = px.sunburst(
+        transactions,
+        values="expense",
+        path=["type", "entity"],
+        title=f"Ratio of expenses by type and entity in year {year}",
+    )
+    fig.update_traces(textinfo="label+percent entry")
+
+    fig.show()
+
     fig = px.bar(
         balance,
         x="month",
