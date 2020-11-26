@@ -6,6 +6,8 @@ from functools import partial
 
 def prepare_data(data: pd.DataFrame):
     prepare_date_columns(data)
+    data['Debit'] = data['Debit'].fillna(0)
+    data['Credit'] = data['Credit'].fillna(0)
     rules = prepare_rules()
     f = partial(
         assign_type,
