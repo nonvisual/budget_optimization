@@ -21,3 +21,4 @@ def prepare_date_columns(data: pd.DataFrame):
     data["month"] = data["Booking date"].dt.month
     data["year"] = data["Booking date"].dt.year
     data["weekday"] = data["Booking date"].dt.weekday
+    data["week"] = data["Booking date"].dt.isocalendar().week
