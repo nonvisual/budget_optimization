@@ -3,3 +3,5 @@ pulp
 numpy
 pandas 
 jupyter
+tabulate
+plotly
