@@ -26,6 +26,14 @@ def create_model(data: pd.DataFrame, savings: float, grocery_per_week: float):
     agg_per_week = data[data["type"] == "grocery"].groupby("week").sum()
     for w in agg_per_week.index:
         week_grocery_spending = abs(agg_per_week.loc[w, "Debit"])
+        summed = sum(
+            [
+                abs(data.loc[t, "Debit"])
+                if (data.loc[t, "week"] == w) and (data.loc[t, "type"] == "grocery")
+                else 0.0
+                for t in data.index
+            ]
+        )
         model += pulp.lpSum(
             [
                 decision_vars[t] * abs(data.loc[t, "Debit"])
