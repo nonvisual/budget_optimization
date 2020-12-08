@@ -6,12 +6,18 @@ import numpy as np
 def visualize_data(transactions: pd.DataFrame, year=2019):
     verify_data(transactions)
     selected_year = transactions[transactions["year"] == year].copy()
-    transactions["expense"] = abs(selected_year["Debit"])
+    selected_year["expense"] = abs(selected_year["Debit"])
 
     balance = selected_year.groupby(["month"]).sum().reset_index()
     balance["balance"] = balance["Credit"] + balance["Debit"]
     balance["color"] = np.where(balance["balance"] < 0, "Negative", "Positive")
     balance["savings"] = balance["balance"].cumsum()
+    grouped_week = (
+        selected_year[selected_year["type"] == "grocery"]
+        .groupby(["week"])
+        .sum()
+        .reset_index()
+    )
 
     fig = px.pie(
         transactions,
@@ -73,15 +79,13 @@ def visualize_data(transactions: pd.DataFrame, year=2019):
     )
     fig.show()
 
-    grouped_week = selected_year.groupby(["week"]).sum().reset_index()
-
     fig = px.bar(
         grouped_week,
         x="week",
         y="Debit",
-        labels={"savings": "Expenses [EUR]", "week": "Week"},
-        color_discrete_sequence=["green"],
-        title=f"Expenses by calendar week for year {year}",
+        labels={"Debit": "Debit [EUR]", "week": "Week"},
+        color_discrete_sequence=["orange"],
+        title=f"Grocery expenses by calendar week for year {year}",
     )
     fig.show()
     fig = px.area(

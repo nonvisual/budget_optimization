@@ -45,7 +45,7 @@ def prepare_rules():
 
     types_mapping["rent"] = ["landlord", "mietforderung", "miete"]
     types_mapping["grocery"].append("rossmann")
-    types_mapping["salary"] = ["salary", "lohn/gehalt"]
+    types_mapping["income"] = ["salary", "lohn/gehalt"]
 
     types_mapping["pharmacy"] = ["apotheke"]
     types_mapping["utility"] = [
