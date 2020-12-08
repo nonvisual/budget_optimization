@@ -5,8 +5,9 @@ import numpy as np
 
 def visualize_data(transactions: pd.DataFrame, year=2019):
     verify_data(transactions)
+    transactions["expense"] = abs(transactions["Debit"])
+
     selected_year = transactions[transactions["year"] == year].copy()
-    selected_year["expense"] = abs(selected_year["Debit"])
 
     balance = selected_year.groupby(["month"]).sum().reset_index()
     balance["balance"] = balance["Credit"] + balance["Debit"]
@@ -20,7 +21,7 @@ def visualize_data(transactions: pd.DataFrame, year=2019):
     )
 
     fig = px.pie(
-        transactions,
+        selected_year,
         values="expense",
         names="type",
         title=f"Ratio of expenses by type in year {year}",
@@ -29,7 +30,7 @@ def visualize_data(transactions: pd.DataFrame, year=2019):
     fig.show()
 
     fig = px.sunburst(
-        transactions,
+        selected_year,
         values="expense",
         path=["type", "entity"],
         title=f"Ratio of expenses by type and entity in year {year}",
