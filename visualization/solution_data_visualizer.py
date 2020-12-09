@@ -97,7 +97,7 @@ def plot_sunbirst_charts(solved_data: pd.DataFrame):
     fig.show()
 
 
-def plot_bar_plots(solved_data: pd.DataFrame):
+def compute_balance_data(solved_data: pd.DataFrame):
     balance = solved_data.groupby(["month"]).sum().reset_index()
     balance["balance"] = balance["Credit"] + balance["Debit"]
     balance["color"] = np.where(balance["balance"] < 0, "Negative", "Positive")
@@ -117,6 +117,11 @@ def plot_bar_plots(solved_data: pd.DataFrame):
     balance_optimized["data_type"] = "optimized"
 
     balance = pd.concat([balance, balance_optimized])
+    return balance
+
+
+def plot_bar_plots(solved_data: pd.DataFrame):
+    balance = compute_balance_data(solved_data)
 
     fig = px.bar(
         balance,
@@ -277,17 +282,9 @@ def plot_solution_preview(solved_data: pd.DataFrame):
 
     # Add locations bar chart
 
-    balance_optimized = (
-        solved_data[solved_data["solution"] == 1].groupby(["month"]).sum().reset_index()
-    )
-    balance_optimized["balance"] = (
-        balance_optimized["Credit"] + balance_optimized["Debit"]
-    )
-    balance_optimized["color"] = np.where(
-        balance_optimized["balance"] < 0, "Negative", "Positive"
-    )
-    balance_optimized["savings"] = balance_optimized["balance"].cumsum()
-    balance_optimized["data_type"] = "optimized"
+    balance = compute_balance_data(solved_data)
+
+    balance_optimized = balance[balance["data_type"] == "optimized"]
 
     fig.add_trace(
         go.Scatter(
