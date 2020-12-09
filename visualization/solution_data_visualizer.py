@@ -240,3 +240,74 @@ def plot_grocery_bar_chart(solved_data: pd.DataFrame, grocery_threshold=None):
         fig["layout"].update(shapes=shapes)
 
     fig.show()
+
+
+def plot_solution_preview(solved_data: pd.DataFrame):
+    solved_data["expense"] = abs(solved_data["Debit"])
+
+    # Initialize figure with subplots
+    fig = make_subplots(
+        rows=2,
+        cols=2,
+        column_widths=[0.6, 0.4],
+        row_heights=[0.4, 0.6],
+        specs=[
+            [{"type": "sunburst", "rowspan": 2}, {"type": "bar"}],
+            [None, {"type": "bar"}],
+        ],
+        subplot_titles=("Expenses distribution", "Monthly savings", "Montly balance"),
+    )
+
+    sb1 = px.sunburst(
+        solved_data[solved_data["solution"] == 1],
+        values="expense",
+        path=["type", "entity"],
+    )._data
+
+    fig.add_trace(
+        go.Sunburst(
+            branchvalues="total",
+            labels=sb1[0]["labels"],
+            parents=sb1[0]["parents"],
+            values=sb1[0]["values"],
+        ),
+        1,
+        1,
+    )
+
+    # Add locations bar chart
+
+    balance_optimized = (
+        solved_data[solved_data["solution"] == 1].groupby(["month"]).sum().reset_index()
+    )
+    balance_optimized["balance"] = (
+        balance_optimized["Credit"] + balance_optimized["Debit"]
+    )
+    balance_optimized["color"] = np.where(
+        balance_optimized["balance"] < 0, "Negative", "Positive"
+    )
+    balance_optimized["savings"] = balance_optimized["balance"].cumsum()
+    balance_optimized["data_type"] = "optimized"
+
+    fig.add_trace(
+        go.Scatter(
+            x=balance_optimized["month"], y=balance_optimized["savings"], fill="tozeroy"
+        ),
+        row=1,
+        col=2,
+    )
+
+    fig.add_trace(
+        go.Bar(
+            x=balance_optimized["month"],
+            y=balance_optimized["balance"],
+        ),
+        row=2,
+        col=2,
+    )
+
+    fig.update_layout(
+        height=600, width=900, showlegend=False, title_text="Optimized plan preview"
+    )
+
+    fig.show()
