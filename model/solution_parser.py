@@ -15,11 +15,14 @@ def parse_solution(
 
     logging.info(f"Status is optimal, parsing solution")
     df = pd.Series(
-        [decision_vars[t].varValue for t in range(len(data))],
+        [
+            decision_vars[t].varValue if decision_vars[t].varValue is not None else 1
+            for t in data.index
+        ],
         index=data.index,
         name="solution",
         dtype=np.int64,
     )
     objective = pulp.value(model.objective)
 
-    return df, objective    
+    return df, objective
